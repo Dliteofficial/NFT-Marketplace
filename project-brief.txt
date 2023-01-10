@@ -1,0 +1,36 @@
+- This is a NFT Marketplace. 
+
+- The scope of the project is to build a marketplace where people can list and buy NFTs. 
+
+- These NFTs could either be the Native NFT or some other NFT. 
+
+- The lister will be able to list their ERC721 tokens for either MATIC or ERC20 tokens (accepted token). 
+
+- This project will also incorporate oracle data feed to get how much will be paid in real time. 
+
+- A user can pay for the NFT using MATIC or any of these 3 tokens: USDC (stablecoin), AAVE and ATOM. 
+
+- We are building all of these with contract security in mind as well.
+
+EVERY PART OF THIS PROJECT WILL BE INTERESTING. L.F.G...
+
+YOU NEED TO KNOW HOW TO USE:
+
+- SOLIDITY
+- GITHUB
+
+This task is a two part task:
+- Developing the Native NFT
+- Building the Marketplace
+
+Functions:
+mint (native)
+burn(native)
+
+ListNFT
+checkAvailableListings
+BuyNFT
+UpdateListingPrice
+getMyNFTs
+NumberOfNFTsSold
+getLatestPrice (Oracle)
