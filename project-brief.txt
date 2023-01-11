@@ -34,3 +34,4 @@ UpdateListingPrice
 getMyNFTs
 NumberOfNFTsSold
 getLatestPrice (Oracle)
+FlashBorrow
