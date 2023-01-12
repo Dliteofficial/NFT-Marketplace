@@ -18,6 +18,7 @@ YOU NEED TO KNOW HOW TO USE:
 
 - SOLIDITY
 - GITHUB
+- ORACLE
 
 This task is a two part task:
 - Developing the Native NFT
@@ -35,3 +36,7 @@ getMyNFTs
 NumberOfNFTsSold
 getLatestPrice (Oracle)
 FlashBorrow
+
+Supplementary Functions
+Auction for the NFT
+% Royalties for creators
