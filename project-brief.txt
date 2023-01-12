@@ -34,9 +34,17 @@ BuyNFT
 UpdateListingPrice
 getMyNFTs
 NumberOfNFTsSold
+Create auction : NFT royalties are fees payable to content creators each time their works are sold. 
+By establishing NFT royalties, creators can continue to profit on a perpetual basis, 
+which may also encourage them to continue making content.
+support Royalty
 getLatestPrice (Oracle)
 FlashBorrow
 
 Supplementary Functions
 Auction for the NFT
 % Royalties for creators
+
+
+PLEASE NOTE: PLEASE VISIT THE PROJECT BRIEF BEFORE EMBARKING ON ANYTHING NEW TO AVOID ANY CONFLICTS
+ALSO PLEASE CREATE A BRANCH AND PUSH YOUR CODE THERE. ONCE YOU ARE DONE, YOU CAN MERGE WITH THE MAIN. CHEERS
