@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
@@ -11,7 +11,7 @@ contract MyToken is ERC721, ERC721Burnable, Ownable {
 
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721("Dlite", "DLT") {}
+    constructor(string, _name, string _symbol) ERC721(_name, _symbol) {}
 
     function _baseURI() internal pure override returns (string memory) {
         return "https://solidity-by-example.org/app/erc721/";
