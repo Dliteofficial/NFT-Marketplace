@@ -234,8 +234,15 @@ contract EcstasyMKT is ReentrancyGuard {
         uint timestamp;
     }
 
+    // ILD - Individual Listing Details
+    struct ILD {
+        uint[] tokenIds;
+        uint total;
+    }
+
     uint public listedNFTCount = 0;
     mapping (uint => listedNFT) listings;
+    mapping (address => ILD) myListings;
 
     function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external {
         IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
@@ -246,13 +253,19 @@ contract EcstasyMKT is ReentrancyGuard {
             listingPrice: listingPrice_in_MATIC,
             timestamp: block.timestamp
             });
+        myListings[msg.sender].tokenIds.push(listedNFTCount);
+        myListings[msg.sender].total += 1;
         listNFTCount++;
     }
 
     function updateListingPrice(uint256 listedTokenID, uint listingPrice_in_MATIC) public payable {
-        listedNFT listing = listings[listedTokenID];
+        listedNFT memory listing = listings[listedTokenID];
         require(listing.listor == msg.sender, "ERR: You didn't list it, you cannot update its price");
         require(block.timestamp > listing.timestamp + 30 days, "ERR: Listing time is less than 30 days");
         listings[listedTokenID].listingPrice = listingPrice_in_MATIC;
+    }
+
+    function getMyNFTs() public view returns (uint totalNumberOfNFTsListed, uint[] tokenIds) {
+        (totalNumberOfNFTsListed, tokenIds) = (myListings[msg.sender].total, myListings[msg.sender].tokenIds);
     }
 }
