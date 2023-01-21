@@ -1,32 +1,31 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol"
 
-import "./NFTCollection.sol";
-import "./ERC20.sol"; // Victor's contract
 import "src/AggregatorV3Interface.sol";
-import "src/NativeNFT.sol";
 
-contract  EcstasyMKT is ERC721URIStorage, ReentrancyGuard {
+import "src/EcstasyNFT.sol";
+
+contract EcstasyMKT is ReentrancyGuard {
  
-   NativeNFT nativeNFT;
+   EcstasyNFT nativeNFT;
    
-   /* Network: Goerli
-     * Aggregator: ETH/USD
+    /* Network: Polygon Mainnet
+     * Aggregator: MATIC /USD
+     * Addresss: 0xAB594600376Ec9fD91F8e885dADF0CE036862dE0
      */
-   constructor() ERC721("MoNFTMarketPlace", "MoNFTM") {
+    constructor() {
         owner =  msg.sender;
-        priceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
-        nativeNFT = new nativeNFT();
+        priceFeed = AggregatorV3Interface(0xAB594600376Ec9fD91F8e885dADF0CE036862dE0);
+        nativeNFT = new EcstasyNFT(address(this));
     }
 
     receive() external payable{}
 
     // Name of the marketplace
-    string public MoMo;
+    string public MARKETPLACE_NAME;
 
     // Index of auctions
     uint256 public index = 0;
@@ -48,26 +47,22 @@ contract  EcstasyMKT is ERC721URIStorage, ReentrancyGuard {
     //Keeps track of the number of items sold on the marketplace
     Counters.Counter private _itemsSold;
     //owner is the contract address that created the smart contract
-    address payable owner;
+    address owner;
     //The fee charged by the marketplace to be allowed to list an NFT
     uint256 listPrice = 0.01 ether;
 
     //The structure to store info about a listed token
     struct ListedToken {
         uint256 tokenId;
-        address payable owner;
         address payable seller;
         uint256 price;
-        bool currentlyListed;
     }
 
     //the event emitted when a token is successfully listed
     event TokenListedSuccess (
         uint256 indexed tokenId,
-        address owner,
         address seller,
-        uint256 price,
-        bool currentlyListed
+        uint256 price
     );
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
@@ -208,7 +203,7 @@ contract  EcstasyMKT is ERC721URIStorage, ReentrancyGuard {
         payable(seller).transfer(msg.value);
     }
 
-    //We can add a reselltoken function in the future
+    //We can add a resell token function in the future
     //In that case, tokens won't be listed by default but users can send a request to actually list a token
     //Currently NFTs are listed by default
 
@@ -228,6 +223,36 @@ contract  EcstasyMKT is ERC721URIStorage, ReentrancyGuard {
         function getLatestPrice() public view returns (int) {
         ( , int price, , , ) = priceFeed.latestRoundData();
 
-        return price;
+        return price / 1e8;
+    }
+
+    struct listedNFT {
+        address NFTAddress;
+        address listor;
+        address tokenID;
+        uint listingPrice;
+        uint timestamp;
+    }
+
+    uint public listedNFTCount = 0;
+    mapping (uint => listedNFT) listings;
+
+    function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external {
+        IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
+        listings[listedNFTCount] = listedNFT({
+            NFTAddress: _tokenAddress, 
+            listor: msg.sender, 
+            tokenID: tokenId, 
+            listingPrice: listingPrice_in_MATIC,
+            timestamp: block.timestamp
+            });
+        listNFTCount++;
+    }
+
+    function updateListingPrice(uint256 listedTokenID, uint listingPrice_in_MATIC) public payable {
+        listedNFT listing = listings[listedTokenID];
+        require(listing.listor == msg.sender, "ERR: You didn't list it, you cannot update its price");
+        require(block.timestamp > listing.timestamp + 30 days, "ERR: Listing time is less than 30 days");
+        listings[listedTokenID].listingPrice = listingPrice_in_MATIC;
     }
 }
