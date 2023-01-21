@@ -16,10 +16,10 @@ contract EcstasyMKT is ReentrancyGuard {
      * Aggregator: MATIC /USD
      * Addresss: 0xAB594600376Ec9fD91F8e885dADF0CE036862dE0
      */
-    constructor() {
-        owner =  msg.sender;
+    constructor(uint _minting_fee) {
         priceFeed = AggregatorV3Interface(0xAB594600376Ec9fD91F8e885dADF0CE036862dE0);
         nativeNFT = new EcstasyNFT(address(this));
+        setMintingFee(_minting_fee);
     }
 
     receive() external payable{}
@@ -89,21 +89,6 @@ contract EcstasyMKT is ReentrancyGuard {
 
     function getCurrentToken() public view returns (uint256) {
         return _tokenIds.current();
-    }
-
-    //The first time a token is created, it is listed here
-    function createToken(string memory tokenURI, uint256 price) public payable returns (uint) {
-        //Increment the tokenId counter, which is keeping track of the number of minted NFTs
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
-
-        //Map the tokenId to the tokenURI (which is an IPFS URL with the NFT metadata)
-        _setTokenURI(newTokenId, tokenURI);
-
-        //Helper function to update Global variables and emit an event
-        createListedToken(newTokenId, price);
-
-        return newTokenId;
     }
 
     function createListedToken(uint256 tokenId, uint256 price) private {
@@ -190,6 +175,8 @@ contract EcstasyMKT is ReentrancyGuard {
     mapping (uint => listedNFT) listings;
     mapping (address => ILD) myListings;
 
+    uint public minting_fee; 
+
     function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external {
         IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
         listings[listedNFTCount] = listedNFT({
@@ -227,5 +214,15 @@ contract EcstasyMKT is ReentrancyGuard {
 
     function numberOfNftsSold() public view returns (uint256) {
         return listedNFTCount;
+    }
+
+    function mintEcstasy() external payable {
+        require(msg.value >= minting_fee, "ERR: Please pay enough for the Ecstasy NFT");
+        nativeNFT.mintEcstasyNFT(msg.sender);
+    }
+
+    function setMintingFee (uint _amount) external onlyOwner {
+        require(_amount > 0, "Zero Amount");
+        minting_fee = _amount;
     }
 }
