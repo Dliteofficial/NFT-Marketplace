@@ -90,32 +90,6 @@ contract EcstasyMKT is ReentrancyGuard {
     function getCurrentToken() public view returns (uint256) {
         return _tokenIds.current();
     }
-
-    function createListedToken(uint256 tokenId, uint256 price) private {
-        //Make sure the sender sent enough ETH to pay for listing
-        require(msg.value == listPrice, "Hopefully sending the correct price");
-        //Just sanity check
-        require(price > 0, "Make sure the price isn't negative");
-
-        //Update the mapping of tokenId's to Token details, useful for retrieval functions
-        idToListedToken[tokenId] = ListedToken(
-            tokenId,
-            payable(address(this)),
-            payable(msg.sender),
-            price,
-            true
-        );
-
-        _transfer(msg.sender, address(this), tokenId);
-        //Emit the event for successful transfer. The frontend parses this message and updates the end user
-        emit TokenListedSuccess(
-            tokenId,
-            address(this),
-            msg.sender,
-            price,
-            true
-        );
-    }
     
    /*When a user clicks "Buy this NFT" on the profile page, the executeSale function is triggered.
     If the user has paid enough ETH equal to the price of the NFT, the NFT gets transferred to the new address 
@@ -142,14 +116,7 @@ contract EcstasyMKT is ReentrancyGuard {
         payable(seller).transfer(msg.value);
     }
 
-    function buy(uint256 numberOfNfts) public payable {
-        require(_nftSold < MAX_NFT_BUYABLE, "Sale has already ended. Please STAKE tokens to earn more!");
-        require(numberOfNfts > 0, "numberOfNfts cannot be 0");
-        require(numberOfNfts <= 10, "You may not buy more than 10 NFTs at once");
-        //require(_nftSold.add(numberOfNfts) <= MAX_NFT_BUYABLE, "Exceeds MAX_NFT_BUYABLE");
-        //_nftSold = _nftSold.add(numberOfNfts);  // update
-
-    }
+    //STARTED FIX HERE..
 
         function getLatestPrice() public view returns (int) {
         ( , int price, , , ) = priceFeed.latestRoundData();
@@ -160,7 +127,7 @@ contract EcstasyMKT is ReentrancyGuard {
     struct listedNFT {
         address NFTAddress;
         address listor;
-        address tokenID;
+        uint tokenID;
         uint listingPrice;
         uint timestamp;
     }
@@ -177,7 +144,8 @@ contract EcstasyMKT is ReentrancyGuard {
 
     uint public minting_fee; 
 
-    function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external {
+    function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external reentrant payable{
+        require(msg.value >= minting_fee, "ERR: Minting_fee Error");
         IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
         listings[listedNFTCount] = listedNFT({
             NFTAddress: _tokenAddress, 
@@ -196,6 +164,15 @@ contract EcstasyMKT is ReentrancyGuard {
         require(listing.listor == msg.sender, "ERR: You didn't list it, you cannot update its price");
         require(block.timestamp > listing.timestamp + 30 days, "ERR: Listing time is less than 30 days");
         listings[listedTokenID].listingPrice = listingPrice_in_MATIC;
+    }
+
+    function cancelListing (uint listingId) external {
+        require(listings[listingId].listor == msg.sender, "ERR: You didn't the NFT, you cannot cancel");
+        listings[listingID].NFTAddress = address(0);
+        listings[listingID].listor = address(0);
+        listings[listingID].timestamp = 0;
+        listings[listingID].listingPrice = 0;
+        listings[listingID].tokenID = 0;
     }
 
     function getMyNFTs() public view returns (uint totalNumberOfNFTsListed, uint[] tokenIds) {
@@ -222,7 +199,23 @@ contract EcstasyMKT is ReentrancyGuard {
     }
 
     function setMintingFee (uint _amount) external onlyOwner {
-        require(_amount > 0, "Zero Amount");
+        require(_amount > 0, "ERR: Zero Amount");
         minting_fee = _amount;
+    }
+
+    function buyNFT_Single(uint listingID) external reentrant payable{
+       listedNFT memory NFTinfo = listings[listingID];
+       require(msg.value >= NFTinfo.listingPrice, "ERR: You didn't pay enough for the NFT");
+       address tokenAddress = NFTinfo.NFTAddress;
+       address tokenId = NFTinfo.tokenID;
+       address listor = NFTinfo.listor;
+       //Remove the NFT from myListings. - Moralie
+       listings[listingID].NFTAddress = address(0);
+       listings[listingID].listor = address(0);
+       listings[listingID].timestamp = 0;
+       listings[listingID].listingPrice = 0;
+       listings[listingID].tokenID = 0;
+       IERC721(tokenAddress).transferFrom(address(this), msg.sender, tokenId);
+       _makePaymentToListor(listor, msg.value); // Create a payment Function - Victor
     }
 }
