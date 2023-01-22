@@ -68,29 +68,11 @@ contract EcstasyMKT is ReentrancyGuard {
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
     mapping(uint256 => ListedToken) private idToListedToken;
 
-    function updateListingPrice(uint256 _listPrice) public payable {
-        require(owner == msg.sender, "Only owner can update listing price");
-        listPrice = _listPrice;
-    }
-
     /* Returns the listing price of the contract */
-    function getListingPrice() public view returns (uint256) {
+    function getListingPrice() public view returns (uint256) { - //UPDATE - MORALIE
         return listPrice;
     }
 
-    function getLatestIdToListedToken() public view returns (ListedToken memory) {
-        uint256 currentTokenId = _tokenIds.current();
-        return idToListedToken[currentTokenId];
-    }
-
-    function getListedTokenForId(uint256 tokenId) public view returns (ListedToken memory) {
-        return idToListedToken[tokenId];
-    }
-
-    function getCurrentToken() public view returns (uint256) {
-        return _tokenIds.current();
-    }
-    
    /*When a user clicks "Buy this NFT" on the profile page, the executeSale function is triggered.
     If the user has paid enough ETH equal to the price of the NFT, the NFT gets transferred to the new address 
     and the proceeds of the sale are sent to the seller.
