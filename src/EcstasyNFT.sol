@@ -20,10 +20,10 @@ contract EcstasyNFT is ERC721URIStorage{
         marketplace = EcstasyMKT(_address);
     }
 
-    function mintEcstasyNFT (address to, string memory tokenURI) external onlyMarketplace{
+    function mintEcstasyNFT (address to) external onlyMarketplace{
         uint newItemId = _tokenIds.current();
         _mint(to, newItemId);
-        _setTokenURI(newItemId, tokenURI);
+        _setTokenURI(newItemId, ""); //Set this when you are ready for production...
         _tokenIds.increment();
     }
 }
