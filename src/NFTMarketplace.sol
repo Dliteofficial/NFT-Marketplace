@@ -126,7 +126,7 @@ contract EcstasyMKT is ReentrancyGuard {
 
     uint public minting_fee; 
 
-    function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external reentrant payable{
+    function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external nonReentrant payable{
         require(msg.value >= minting_fee, "ERR: Minting_fee Error");
         IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
         listings[listedNFTCount] = listedNFT({
@@ -185,7 +185,7 @@ contract EcstasyMKT is ReentrancyGuard {
         minting_fee = _amount;
     }
 
-    function buyNFT_Single(uint listingID) external reentrant payable{
+    function buyNFT_Single(uint listingID) external nonReentrant payable{
        listedNFT memory NFTinfo = listings[listingID];
        require(msg.value >= NFTinfo.listingPrice, "ERR: You didn't pay enough for the NFT");
        address tokenAddress = NFTinfo.NFTAddress;
