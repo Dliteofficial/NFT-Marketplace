@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol"
@@ -68,8 +68,9 @@ contract EcstasyMKT is ReentrancyGuard {
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
     mapping(uint256 => ListedToken) private idToListedToken;
 
-    /* Returns the listing price of the contract */
-    function getListingPrice() public view returns (uint256) { - //UPDATE - MORALIE
+    /* Returns the listing price of the contract 
+     If you have a token ID, get the listing price*/
+    function getListingPrice() public view returns (uint256) { //UPDATE - MORALIE
         return listPrice;
     }
 
@@ -184,6 +185,18 @@ contract EcstasyMKT is ReentrancyGuard {
         require(_amount > 0, "ERR: Zero Amount");
         minting_fee = _amount;
     }
+    
+    /*Internal function to remove a listing from storage
+     * @dev Remove listing from storage
+     * @param listingId - ID of the listing to remove
+     */
+    function _removeListingStorage(uint256 listingId) internal {
+        addrToActiveListings[msg.sender].remove(listingId);
+        tokenIdToListing[
+            listingIdToListing[listingId].tokenId
+        ] = listingIdToListing[listingId];
+        openListings.remove(listingId);
+    }
 
     function buyNFT_Single(uint listingID) external nonReentrant payable{
        listedNFT memory NFTinfo = listings[listingID];
@@ -191,13 +204,27 @@ contract EcstasyMKT is ReentrancyGuard {
        address tokenAddress = NFTinfo.NFTAddress;
        address tokenId = NFTinfo.tokenID;
        address listor = NFTinfo.listor;
-       //Remove the NFT from myListings. - Moralie
+       
+       listings[listingID].listingPrice = 0;
+  
+       //Set active to updated listing
+        listingIdToListing[listingId] = listing;
+        //Remove listing from open listings and from the address's active listings
+        _removeListingStorage(listingId);
+      
        listings[listingID].NFTAddress = address(0);
        listings[listingID].listor = address(0);
        listings[listingID].timestamp = 0;
        listings[listingID].listingPrice = 0;
        listings[listingID].tokenID = 0;
        IERC721(tokenAddress).transferFrom(address(this), msg.sender, tokenId);
-       _makePaymentToListor(listor, msg.value); // Create a payment Function - Victor
+       _makePaymentToListor(listor, msg.value); // Create a payment Function
+    }
+    
+    function buy_Multiple_NFT(uint listingID, address to, uint amount) external nonReentrant payable {
+        for(uint i = 0 ; i<amount; i++){
+            buyNFT(to);
+        }
+        
     }
 }
