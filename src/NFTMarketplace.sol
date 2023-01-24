@@ -200,4 +200,7 @@ contract EcstasyMKT is ReentrancyGuard {
        IERC721(tokenAddress).transferFrom(address(this), msg.sender, tokenId);
        _makePaymentToListor(listor, msg.value); // Create a payment Function - Victor
     }
+    function _makePaymentToListor(address to, uint value) internal {
+       to.transfer(value);
+    }
 }
