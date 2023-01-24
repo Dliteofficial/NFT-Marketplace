@@ -70,7 +70,7 @@ contract EcstasyMKT is ReentrancyGuard {
 
     /* Returns the listing price of the contract 
      If you have a token ID, get the listing price*/
-    function getListingPrice() public view returns (uint256) { //UPDATE - MORALIE
+    function getListingPrice(nftAddress, tokenId() public view returns (uint256) { 
         return listPrice;
     }
 
