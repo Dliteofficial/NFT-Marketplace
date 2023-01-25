@@ -7,8 +7,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol"
 import "src/AggregatorV3Interface.sol";
 
 import "src/EcstasyNFT.sol";
+import "src/NFTAuction.sol";
 
-contract EcstasyMKT is ReentrancyGuard {
+contract EcstasyMKT is ReentrancyGuard, NFTAuction {
  
    EcstasyNFT nativeNFT;
    
