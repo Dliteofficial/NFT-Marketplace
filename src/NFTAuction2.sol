@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 /// @title This contract provides the functionalities needed to auction NFTs
-/// @author Dliteofficial, VictorFawole & Moralie
+/// @author Dliteofficial, Moralie & VictorFawole
 
 contract NFTAuction {
 
