@@ -1,9 +1,7 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.7;
 
-    /// @author Dliteofficial, VictorFawole & Moralie
-    // @author: MoMih2022
-    
+    // @author: MoMih2022 /// @author Dliteofficial, VictorFawole & Moralie
 contract NFTAuction {
     // Variables
     uint public actionFee;
@@ -46,6 +44,8 @@ contract NFTAuction {
 
     function createAuction (address nftAddress, uint tokenId, uint minimumStake) public payable {
         require(msg.value >= actionFee, "Action fee not met");
+        require(nftAddress.transferFrom(msg.sender, address(this), tokenId), "Transfer of NFT failed");
+        
         //increment the number of auctions
         numberOfAuctions++;
         numberOfActiveAuctions++;
@@ -91,19 +91,22 @@ contract NFTAuction {
         address winner = auctions[uniqueId].lastBidder;
 
         uint bidAmount = auctions[uniqueId].lastBid;
-        
+    
         require(winner != address(0), "No bids were made on this auction");
-        
+    
         bool transferSuccess = auctions[uniqueId].nftAddress.transferFrom(address(this), winner, auctions[uniqueId].tokenId);
-        
+    
         require(transferSuccess, "Transfer failed");
-        
-        winner.transfer(bidAmount);
-        
+    
+        // Transfer the winning bid amount to the auctioneer
+        address auctioneer = address(this);
+        auctioneer.transfer(bidAmount);
+    
         delete auctions[uniqueId];
-        
+    
         numberOfActiveAuctions--;
     }
+
 
 
     modifier onlyAuctioneer {
