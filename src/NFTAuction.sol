@@ -29,6 +29,12 @@ contract NFTAuction {
         address lastBidder;
     }
 
+    constructor(uint _auctionFee, uint _auctionDuration) {
+      if(_auctionFee == 0 && _auctionDuration == 0) revert ("Zero Input");
+      auctionFee = _auctionFee;
+      auctionDuration = _auctionDuration;
+    }
+
     // Functions
     
 
