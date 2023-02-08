@@ -1292,9 +1292,69 @@
         }
       }
     },
+    "src/EcstasyMKT.sol": {
+      "lastModificationDate": 1675885281787,
+      "contentHash": "532b37cfb119b221db167748e68e32a7",
+      "sourceName": "src/EcstasyMKT.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts\\contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts\\contracts/security/ReentrancyGuard.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol",
+        "lib/openzeppelin-contracts\\contracts/token/ERC721/IERC721.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol",
+        "lib/openzeppelin-contracts\\contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Address.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts\\contracts/utils/Counters.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
+        "src\\AggregatorV3Interface.sol",
+        "src\\EcstasyMKT.sol",
+        "src\\EcstasyNFT.sol",
+        "src\\NFTAuction.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "EcstasyMKT": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "EcstasyMKT.sol\\EcstasyMKT.json"
+        }
+      }
+    },
     "src/EcstasyNFT.sol": {
-      "lastModificationDate": 1675866613972,
-      "contentHash": "373a331a891ba1a4b73373952a1588d2",
+      "lastModificationDate": 1675885090865,
+      "contentHash": "b00ce0552f6449af0287a1d49710d92d",
       "sourceName": "src/EcstasyNFT.sol",
       "solcConfig": {
         "settings": {
@@ -1341,9 +1401,9 @@
         "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
         "src\\AggregatorV3Interface.sol",
+        "src\\EcstasyMKT.sol",
         "src\\EcstasyNFT.sol",
-        "src\\NFTAuction.sol",
-        "src\\NFTMarketplace.sol"
+        "src\\NFTAuction.sol"
       ],
       "versionRequirement": "^0.8.0",
       "artifacts": {
@@ -1353,8 +1413,8 @@
       }
     },
     "src/NFTAuction.sol": {
-      "lastModificationDate": 1675836063218,
-      "contentHash": "51184fc30a170b28541a01b05b8ba95e",
+      "lastModificationDate": 1675885376045,
+      "contentHash": "4f90241fcbc53d3570c7e47132a6db10",
       "sourceName": "src/NFTAuction.sol",
       "solcConfig": {
         "settings": {
@@ -1395,70 +1455,10 @@
         }
       }
     },
-    "src/NFTMarketplace.sol": {
-      "lastModificationDate": 1675866527735,
-      "contentHash": "a5d904f855ba4cba34cfdaecb74905d8",
-      "sourceName": "src/NFTMarketplace.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "lib/openzeppelin-contracts\\contracts/access/Ownable.sol",
-        "lib/openzeppelin-contracts\\contracts/security/ReentrancyGuard.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol",
-        "lib/openzeppelin-contracts\\contracts/token/ERC721/IERC721.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol",
-        "lib/openzeppelin-contracts\\contracts/token/ERC721/extensions/ERC721URIStorage.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Address.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
-        "lib/openzeppelin-contracts\\contracts/utils/Counters.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
-        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
-        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
-        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
-        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
-        "src\\AggregatorV3Interface.sol",
-        "src\\EcstasyNFT.sol",
-        "src\\NFTAuction.sol",
-        "src\\NFTMarketplace.sol"
-      ],
-      "versionRequirement": "^0.8.0",
-      "artifacts": {
-        "EcstasyMKT": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "NFTMarketplace.sol\\EcstasyMKT.json"
-        }
-      }
-    },
-    "test/NFTMarketplace.t.sol": {
-      "lastModificationDate": 1673373021076,
-      "contentHash": "52e3bf870e5627d90f2fef4674fab260",
-      "sourceName": "test/NFTMarketplace.t.sol",
+    "test/EcstasyMKT.t.sol": {
+      "lastModificationDate": 1675885444573,
+      "contentHash": "b58287ba9c861916fd37df9dbb21f859",
+      "sourceName": "test/EcstasyMKT.t.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1501,12 +1501,31 @@
         "lib/forge-std/src\\Test.sol",
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
-        "lib/forge-std/src/console2.sol"
+        "lib/forge-std/src/console2.sol",
+        "lib/openzeppelin-contracts\\contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts\\contracts/security/ReentrancyGuard.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol",
+        "lib/openzeppelin-contracts\\contracts/token/ERC721/IERC721.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol",
+        "lib/openzeppelin-contracts\\contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Address.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts\\contracts/utils/Counters.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
+        "src\\AggregatorV3Interface.sol",
+        "src\\EcstasyMKT.sol",
+        "src\\EcstasyNFT.sol",
+        "src\\NFTAuction.sol"
       ],
       "versionRequirement": "^0.8.13",
       "artifacts": {
-        "ContractTest": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "NFTMarketplace.t.sol\\ContractTest.json"
+        "EcstasyMKTTest": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "EcstasyMKT.t.sol\\EcstasyMKTTest.json"
         }
       }
     }

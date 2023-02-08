@@ -31,6 +31,8 @@ contract NFTAuction {
 
     constructor(uint _auctionFee, uint _auctionDuration) {
       if(_auctionFee == 0 && _auctionDuration == 0) revert ("Zero Input");
+      if(_auctionFee < 0.1e18) revert ("Invalid auction fee");
+      //check auction duration
       auctionFee = _auctionFee;
       auctionDuration = _auctionDuration;
     }

@@ -12,7 +12,7 @@ import {NFTAuction} from "src/NFTAuction.sol";
 
 contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
  
-   EcstasyNFT nativeNFT;
+   EcstasyNFT public nativeNFT;
    AggregatorV3Interface priceFeed;
    
     /* Network: Polygon Mainnet
@@ -30,17 +30,22 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         ) {
         priceFeed = AggregatorV3Interface(0xAB594600376Ec9fD91F8e885dADF0CE036862dE0);
         nativeNFT = new EcstasyNFT(payable(address(this)));
-        //setMintingFee(_minting_fee);
+        _setMintingFee(_minting_fee);
+    }
+
+    function _setMintingFee(uint _mintingFee) internal {
+        if(_mintingFee < 0.1e18) revert("Invalid Minting Fee");
+        minting_fee = _mintingFee;
     }
 
     receive() external payable{}
 
     //STARTED FIX HERE..
 
-        function getLatestPrice() public view returns (int) {
-        ( , int price, , , ) = priceFeed.latestRoundData();
+    function getLatestPrice() public view returns (int) {
+    ( , int price, , , ) = priceFeed.latestRoundData();
 
-        return price / 1e8;
+    return price / 1e8;
     }
 
     struct listedNFT {
@@ -115,11 +120,6 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
     function mintEcstasy() external payable {
         require(msg.value >= minting_fee, "ERR: Please pay enough for the Ecstasy NFT");
         nativeNFT.mintEcstasyNFT(msg.sender);
-    }
-
-    function setMintingFee (uint _amount) external onlyOwner {
-        require(_amount > 0, "ERR: Zero Amount");
-        minting_fee = _amount;
     }
 
     function buyNFT_Single(uint listingID) external nonReentrant payable{
