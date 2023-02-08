@@ -1,16 +1,15 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.7;
 
-    // @author: MoMih2022 /// @author Dliteofficial, VictorFawole & Moralie
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+/// @author Dliteofficial, Moralie and Victor
 contract NFTAuction {
     // Variables
-    uint public actionFee;
+    uint public auctionFee;
 
     //Auctioning duration, after which every auction ends. An auction cannot be stopped.
     uint public auctionDuration;
-
-    /// @notice Total number of auctions
-    uint public numberOfAuctions = 0;
 
     // @notice Total number of active auctions
     uint public numberOfActiveAuctions = 0;
@@ -43,16 +42,15 @@ contract NFTAuction {
     // @param minimumStake The minimum amount that can be accepted for a bid
 
     function createAuction (address nftAddress, uint tokenId, uint minimumStake) public payable {
-        require(msg.value >= actionFee, "Action fee not met");
-        require(nftAddress.transferFrom(msg.sender, address(this), tokenId), "Transfer of NFT failed");
+        require(msg.value >= auctionFee, "ERR: AUCTION FEE NOT MET");
+        IERC721(nftAddress).transferFrom(msg.sender, address(this), tokenId); //Ensure this passes
         
         //increment the number of auctions
-        numberOfAuctions++;
+        auctionCounter++;
         numberOfActiveAuctions++;
 
         // Store the auction information
-        uint uniqueId = auctionCounter++;
-        auctions[uniqueId] = Auction({
+        auctions[auctionCounter] = Auction({
             nftAddress: nftAddress,
             tokenId: tokenId,
             minimumStake: minimumStake,
@@ -94,12 +92,12 @@ contract NFTAuction {
     
         require(winner != address(0), "No bids were made on this auction");
     
-        bool transferSuccess = auctions[uniqueId].nftAddress.transferFrom(address(this), winner, auctions[uniqueId].tokenId);
+        //bool transferSuccess = auctions[uniqueId].nftAddress.transferFrom(address(this), winner, auctions[uniqueId].tokenId);
     
-        require(transferSuccess, "Transfer failed");
+        //require(transferSuccess, "Transfer failed");
     
         // Transfer the winning bid amount to the auctioneer
-        address auctioneer = address(this);
+        address payable auctioneer = payable(address(this));
         auctioneer.transfer(bidAmount);
     
         delete auctions[uniqueId];

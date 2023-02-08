@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol"
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 import "src/AggregatorV3Interface.sol";
 
@@ -71,7 +71,7 @@ contract EcstasyMKT is ReentrancyGuard, NFTAuction {
 
     /* Returns the listing price of the contract */
     function getListingPrice() public view returns (uint256) { - //UPDATE - MORALIE
-        return listPrice;
+        return 1;
     }
 
    /*When a user clicks "Buy this NFT" on the profile page, the executeSale function is triggered.
