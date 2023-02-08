@@ -24,7 +24,7 @@ contract NFTAuction {
         uint minimumStake;
         uint startTime;
         uint endTime;
-
+        address listor;
         uint lastBid;
         address lastBidder;
     }
@@ -35,7 +35,7 @@ contract NFTAuction {
     // @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /// @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /** @dev This function records the details of an auction including the start and endTime
-      * @dev This function is alos payable because they need to pay an auction fee to auction
+    *   @dev This function is alos payable because they need to pay an auction fee to auction
     */
     // @param nftAddress This is the address of the nft we are auctioning.
     // @param tokenId This is so we transfer the right token in the collection
@@ -57,7 +57,8 @@ contract NFTAuction {
             startTime: block.timestamp,
             endTime: block.timestamp + auctionDuration,
             lastBid: 0,
-            lastBidder: address(0)
+            lastBidder: address(0),
+            listor: msg.sender
         });
     }
 
@@ -70,10 +71,13 @@ contract NFTAuction {
 
     function bid (uint uniqueId) public payable {
         require(isOpen(uniqueId), "Auction is closed");
-        require(msg.value > auctions[uniqueId].lastBid, "Bid must be higher than the last bid");
         require(msg.value >= auctions[uniqueId].minimumStake, "Bid must meet the minimum stake");
-        auctions[uniqueId].lastBid = msg.value;
+        require(msg.value > auctions[uniqueId].lastBid, "Bid must be higher than the last bid");
+        address lastBidder = auctions[uniqueId].lastBidder;
+        uint lastbid = auctions[uniqueId].lastBid;
         auctions[uniqueId].lastBidder = msg.sender;
+        auctions[uniqueId].lastBid = msg.value;
+        payable(lastBidder).transfer(lastbid);
     }
 
     /*
