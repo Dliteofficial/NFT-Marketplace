@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "src/AggregatorV3Interface.sol";
 
-import "src/EcstasyNFT.sol";
+import {EcstasyNFT} from "src/EcstasyNFT.sol";
 import {NFTAuction} from "src/NFTAuction.sol";
 
 contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
