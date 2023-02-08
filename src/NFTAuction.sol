@@ -1,68 +1,126 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 
-/// @title This contract provides the functionalities needed to auction NFTs
-/// @author Dliteofficial, VictorFawole & Moralie
-
+    // @author: MoMih2022 /// @author Dliteofficial, VictorFawole & Moralie
 contract NFTAuction {
+    // Variables
+    uint public actionFee;
 
-    uint public actionFee; //To be set later
-
-    //Auctioning duration, after which every auction ends, 
-    //An auction cannot be stopped
+    //Auctioning duration, after which every auction ends. An auction cannot be stopped.
     uint public auctionDuration;
 
     /// @notice Total number of auctions
     uint public numberOfAuctions = 0;
 
-    /// @notice Total number of active auctions
+    // @notice Total number of active auctions
     uint public numberOfActiveAuctions = 0;
 
     uint public auctionCounter = 0;
 
+    mapping (uint => Auction) public auctions;
+
+    struct Auction {
+        address nftAddress;
+        uint tokenId;
+        uint minimumStake;
+        uint startTime;
+        uint endTime;
+
+        uint lastBid;
+        address lastBidder;
+    }
+
+    // Functions
+    
+
+    // @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /// @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /** @dev This function records the details of an auction including the start and endTime
       * @dev This function is alos payable because they need to pay an auction fee to auction
     */
-    /// @param nftAddress This is the address of the nft we are auctioning.
-    /// @param tokenId This is so we transfer the right token in the collection
-    /// @param minimumStake The minimum amount that can be accepted for a bid
+    // @param nftAddress This is the address of the nft we are auctioning.
+    // @param tokenId This is so we transfer the right token in the collection
+    // @param minimumStake The minimum amount that can be accepted for a bid
 
-    function createAuction (
-        address nftAddress,
-        uint tokenId,
-        uint minimumStake
-        ) public payable {
+    function createAuction (address nftAddress, uint tokenId, uint minimumStake) public payable {
+        require(msg.value >= actionFee, "Action fee not met");
+        require(nftAddress.transferFrom(msg.sender, address(this), tokenId), "Transfer of NFT failed");
+        
+        //increment the number of auctions
+        numberOfAuctions++;
+        numberOfActiveAuctions++;
 
+        // Store the auction information
+        uint uniqueId = auctionCounter++;
+        auctions[uniqueId] = Auction({
+            nftAddress: nftAddress,
+            tokenId: tokenId,
+            minimumStake: minimumStake,
+            startTime: block.timestamp,
+            endTime: block.timestamp + auctionDuration,
+            lastBid: 0,
+            lastBidder: address(0)
+        });
     }
 
     /** 
       * @notice Allows a user to make a bid on an NFT using a unique ID after making payment
       * @dev Use the unique ID to trace the NFT so the user can make a bid on the NFT.
       * @dev the new bid has to be greater than the previous bid too
+      * Tip: display the value of the last bid
      */
-    function bid (uint uniqueId) public payable {
 
+    function bid (uint uniqueId) public payable {
+        require(isOpen(uniqueId), "Auction is closed");
+        require(msg.value > auctions[uniqueId].lastBid, "Bid must be higher than the last bid");
+        require(msg.value >= auctions[uniqueId].minimumStake, "Bid must meet the minimum stake");
+        auctions[uniqueId].lastBid = msg.value;
+        auctions[uniqueId].lastBidder = msg.sender;
     }
 
-    /** 
-      * @notice Allows the auctioneer to claim the highest bid in the auction
-      * @dev onlyAuctioneer verifies that the auctioneer is the one trying to collect the funds for the NFT (uniqueID)
-      * @dev pay the auctioneer the bidded amount and transfer the NFT to the winner of the bid
-     */
+    /*
+    * @notice: Allows the auctioneer to claim the highest bid in the auction
+    * @dev onlyAuctioneer verifies that the auctioneer is the one trying to collect the funds for the NFT (uniqueID)
+    * @dev pay the auctioneer the bidded amount and transfer the NFT to the winner of the bid
+    */
+
     function claimMyFunds (uint uniqueId) public onlyAuctioneer {
 
+        require(!isOpen(uniqueId), "Auction is still open");
+
+        address winner = auctions[uniqueId].lastBidder;
+
+        uint bidAmount = auctions[uniqueId].lastBid;
+    
+        require(winner != address(0), "No bids were made on this auction");
+    
+        bool transferSuccess = auctions[uniqueId].nftAddress.transferFrom(address(this), winner, auctions[uniqueId].tokenId);
+    
+        require(transferSuccess, "Transfer failed");
+    
+        // Transfer the winning bid amount to the auctioneer
+        address auctioneer = address(this);
+        auctioneer.transfer(bidAmount);
+    
+        delete auctions[uniqueId];
+    
+        numberOfActiveAuctions--;
     }
 
-    /// @notice checks if bidding is still open for a NFT
-    /// @dev returns a true/false if bidding is still open or not
-    function isOpen(uint256 uniqueID) public view returns (bool) {
 
+
+    modifier onlyAuctioneer {
+        require(msg.sender == address(this), "Only the auctioneer can perform this action");
+        _;
     }
 
-    /// @notice provide the last bidding price on the NFT
-    /// @return returns the last bidding price of the NFT
-    function getLastBid(uint256 uniqueID) public view returns (uint256) {
 
+    function isOpen(uint uniqueId) public view returns (bool) {
+        return auctions[uniqueId].endTime > block.timestamp;
     }
+
+    function getLastBid(uint uniqueId) public view returns (uint) {
+        return auctions[uniqueId].lastBid;
+    }
+    
 }
