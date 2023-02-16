@@ -62,14 +62,16 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         uint total;
     }
 
-    uint public listedNFTCount = 0;
-    mapping (uint => listedNFT) listings;
-    mapping (address => ILD) myListings;
+    uint public listedNFTCount = 1;
+    mapping (uint => listedNFT) public listings;
+    mapping (address => ILD) public myListings;
 
     uint public minting_fee; 
 
+    uint listing_fee = 0.1e18;
+
     function listMyNFTforSale(address _tokenAddress, uint tokenId, uint listingPrice_in_MATIC ) external nonReentrant payable{
-        require(msg.value >= minting_fee, "ERR: Minting_fee Error");
+        require(msg.value >= listing_fee, "ERR: Minting_fee Error");
         IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
         listings[listedNFTCount] = listedNFT({
             NFTAddress: _tokenAddress, 
@@ -86,7 +88,7 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
     function updateListingPrice(uint256 listedTokenID, uint listingPrice_in_MATIC) public payable {
         listedNFT memory listing = listings[listedTokenID];
         require(listing.listor == msg.sender, "ERR: You didn't list it, you cannot update its price");
-        require(block.timestamp > listing.timestamp + 30 days, "ERR: Listing time is less than 30 days");
+        require(block.timestamp >= listing.timestamp + 30 days, "ERR: Listing time is less than 30 days");
         listings[listedTokenID].listingPrice = listingPrice_in_MATIC;
     }
 
@@ -98,11 +100,7 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         listings[listingId].listingPrice = 0;
         listings[listingId].tokenID = 0;
     }
-
-    /* function getMyNFTs() public view returns (uint totalNumberOfNFTsListed, uint[] calldata tokenIds) {
-        (totalNumberOfNFTsListed, tokenIds) = (myListings[msg.sender].total, myListings[msg.sender].tokenIds);
-    }
- */
+    
     function getAllNFTs() public view returns (listedNFT[] memory) {
         listedNFT[] memory returnData = new listedNFT[](listedNFTCount);
 
@@ -135,9 +133,6 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
        listings[listingID].listingPrice = 0;
        listings[listingID].tokenID = 0;
        IERC721(tokenAddress).transferFrom(address(this), msg.sender, tokenId);
-       _makePaymentToListor(payable(listor), msg.value); // Create a payment Function - Victor
-    }
-    function _makePaymentToListor(address payable to, uint value) internal {
-       to.transfer(value);
+       payable(listor).transfer(msg.value);
     }
 }
