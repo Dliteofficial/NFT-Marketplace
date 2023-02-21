@@ -2,7 +2,7 @@
   "_format": "ethers-rs-sol-cache-3",
   "paths": {
     "artifacts": "out",
-    "build_infos": "out\\build-info",
+    "build_infos": "out/build-info",
     "sources": "src",
     "tests": "test",
     "scripts": "script",
@@ -1252,49 +1252,9 @@
         }
       }
     },
-    "src/AggregatorV3Interface.sol": {
-      "lastModificationDate": 1675865646955,
-      "contentHash": "ca44ded4fd58ffe3a5e1f2db5dac1074",
-      "sourceName": "src/AggregatorV3Interface.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": ">=0.4.24",
-      "artifacts": {
-        "AggregatorV3Interface": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "AggregatorV3Interface.sol\\AggregatorV3Interface.json"
-        }
-      }
-    },
     "src/EcstasyMKT.sol": {
-      "lastModificationDate": 1676581867918,
-      "contentHash": "8d5022638869d04dfdf43656974c0ff8",
+      "lastModificationDate": 1676939954395,
+      "contentHash": "3b1562b39de0d0e57e70cd9bb6adb3e0",
       "sourceName": "src/EcstasyMKT.sol",
       "solcConfig": {
         "settings": {
@@ -1340,7 +1300,6 @@
         "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
-        "src\\AggregatorV3Interface.sol",
         "src\\EcstasyMKT.sol",
         "src\\EcstasyNFT.sol",
         "src\\NFTAuction.sol"
@@ -1353,8 +1312,8 @@
       }
     },
     "src/EcstasyNFT.sol": {
-      "lastModificationDate": 1675885090865,
-      "contentHash": "b00ce0552f6449af0287a1d49710d92d",
+      "lastModificationDate": 1676939962533,
+      "contentHash": "b2e9f6ee32a50f0c8775eedbff02f405",
       "sourceName": "src/EcstasyNFT.sol",
       "solcConfig": {
         "settings": {
@@ -1400,7 +1359,6 @@
         "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
-        "src\\AggregatorV3Interface.sol",
         "src\\EcstasyMKT.sol",
         "src\\EcstasyNFT.sol",
         "src\\NFTAuction.sol"
@@ -1413,8 +1371,8 @@
       }
     },
     "src/NFTAuction.sol": {
-      "lastModificationDate": 1675885376045,
-      "contentHash": "4f90241fcbc53d3570c7e47132a6db10",
+      "lastModificationDate": 1676939560532,
+      "contentHash": "297643b47afd11575a707b99bf50082e",
       "sourceName": "src/NFTAuction.sol",
       "solcConfig": {
         "settings": {
@@ -1456,8 +1414,8 @@
       }
     },
     "test/EcstasyMKT.t.sol": {
-      "lastModificationDate": 1676582125640,
-      "contentHash": "3d1c9d3cb9f1597ef2b5c7cf6c9802d1",
+      "lastModificationDate": 1676939388696,
+      "contentHash": "06bb927a3bcdd419ae1410b8b5aa7048",
       "sourceName": "test/EcstasyMKT.t.sol",
       "solcConfig": {
         "settings": {
@@ -1517,7 +1475,6 @@
         "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
-        "src\\AggregatorV3Interface.sol",
         "src\\EcstasyMKT.sol",
         "src\\EcstasyNFT.sol",
         "src\\NFTAuction.sol"

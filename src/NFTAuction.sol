@@ -8,6 +8,8 @@ contract NFTAuction {
     // Variables
     uint public auctionFee;
 
+    address public auctioneer;
+
     //Auctioning duration, after which every auction ends. An auction cannot be stopped.
     uint public auctionDuration;
 
@@ -29,12 +31,19 @@ contract NFTAuction {
         address lastBidder;
     }
 
-    constructor(uint _auctionFee, uint _auctionDuration) {
-      if(_auctionFee == 0 && _auctionDuration == 0) revert ("Zero Input");
-      if(_auctionFee < 0.1e18) revert ("Invalid auction fee");
-      //check auction duration
+    error ZeroInput();
+    error InvalidAuctionFee();
+    error NotOpen();
+    error MinimumStakeNotSatisfied();
+    error PlaceAHigherBid();
+    error OpenBidding();
+
+    constructor(uint _auctionFee, uint _auctionDuration, address _auctioneer) {
+      if(_auctionFee == 0 && _auctionDuration == 0) revert ZeroInput();
+      if(_auctionFee < 0.1e18) revert InvalidAuctionFee();
       auctionFee = _auctionFee;
       auctionDuration = _auctionDuration;
+      auctioneer = _auctioneer;
     }
 
     // Functions
@@ -49,25 +58,26 @@ contract NFTAuction {
     // @param tokenId This is so we transfer the right token in the collection
     // @param minimumStake The minimum amount that can be accepted for a bid
 
-    function createAuction (address nftAddress, uint tokenId, uint minimumStake) public payable {
-        require(msg.value >= auctionFee, "ERR: AUCTION FEE NOT MET");
-        IERC721(nftAddress).transferFrom(msg.sender, address(this), tokenId); //Ensure this passes
+    function createAuction (address _nftAddress, uint _tokenId, uint _minimumStake) public payable {
+        if(msg.value < auctionFee) revert InvalidAuctionFee();
+        IERC721(_nftAddress).transferFrom(msg.sender, address(this), _tokenId); //Ensure this passes
         
         //increment the number of auctions
         auctionCounter++;
         numberOfActiveAuctions++;
 
         // Store the auction information
-        auctions[auctionCounter] = Auction({
-            nftAddress: nftAddress,
-            tokenId: tokenId,
-            minimumStake: minimumStake,
+        Auction memory auc = Auction({
+            nftAddress: _nftAddress,
+            tokenId: _tokenId,
+            minimumStake: _minimumStake,
             startTime: block.timestamp,
             endTime: block.timestamp + auctionDuration,
             lastBid: 0,
             lastBidder: address(0),
             listor: msg.sender
         });
+        auctions[auctionCounter - 1] = auc;
     }
 
     /** 
@@ -78,13 +88,16 @@ contract NFTAuction {
      */
 
     function bid (uint uniqueId) public payable {
-        require(isOpen(uniqueId), "Auction is closed");
-        require(msg.value >= auctions[uniqueId].minimumStake, "Bid must meet the minimum stake");
-        require(msg.value > auctions[uniqueId].lastBid, "Bid must be higher than the last bid");
-        address lastBidder = auctions[uniqueId].lastBidder;
-        uint lastbid = auctions[uniqueId].lastBid;
-        auctions[uniqueId].lastBidder = msg.sender;
-        auctions[uniqueId].lastBid = msg.value;
+        if(!isOpen(uniqueId)) revert NotOpen();
+        Auction memory AUCDetails = auctions[uniqueId];
+        if(msg.value < AUCDetails.minimumStake) revert MinimumStakeNotSatisfied();
+        if(msg.value <= AUCDetails.lastBid) revert PlaceAHigherBid();
+        address lastBidder = AUCDetails.lastBidder;
+        uint lastbid = AUCDetails.lastBid;
+        AUCDetails.lastBidder = msg.sender;
+        AUCDetails.lastBid = msg.value;
+        auctions[uniqueId] = AUCDetails;
+        //This might lead to a Denial of Service Attack. It is best you use an ERC20 token to prevent this so balances can just be recorder
         payable(lastBidder).transfer(lastbid);
     }
 
@@ -96,31 +109,28 @@ contract NFTAuction {
 
     function claimMyFunds (uint uniqueId) public onlyAuctioneer {
 
-        require(!isOpen(uniqueId), "Auction is still open");
+        if(isOpen(uniqueId)) revert OpenBidding();
 
-        address winner = auctions[uniqueId].lastBidder;
+        Auction memory AUCDetails = auctions[uniqueId];
 
-        uint bidAmount = auctions[uniqueId].lastBid;
+        address winner = AUCDetails.lastBidder;
+        uint bidAmount = AUCDetails.lastBid;
+        uint tokenId = AUCDetails.tokenId;
+        address nftAddress = AUCDetails.nftAddress;
     
         require(winner != address(0), "No bids were made on this auction");
-    
-        //bool transferSuccess = auctions[uniqueId].nftAddress.transferFrom(address(this), winner, auctions[uniqueId].tokenId);
-    
-        //require(transferSuccess, "Transfer failed");
-    
-        // Transfer the winning bid amount to the auctioneer
-        address payable auctioneer = payable(address(this));
-        auctioneer.transfer(bidAmount);
-    
+        payable(AUCDetails.listor).transfer(bidAmount);
+
+        IERC721(nftAddress).transferFrom(address(this), winner, tokenId);
+
         delete auctions[uniqueId];
-    
         numberOfActiveAuctions--;
     }
 
 
 
     modifier onlyAuctioneer {
-        require(msg.sender == address(this), "Only the auctioneer can perform this action");
+        require(msg.sender == auctioneer, "Only the auctioneer can perform this action");
         _;
     }
 

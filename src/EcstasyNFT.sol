@@ -16,7 +16,7 @@ contract EcstasyNFT is ERC721URIStorage{
         _;
     }
 
-    constructor(address payable _address) ERC721("ECstasyNFT", "eNFT"){
+    constructor(address payable _address) ERC721("EcstasyNFT", "eNFT"){
         marketplace = EcstasyMKT(_address);
     }
 
