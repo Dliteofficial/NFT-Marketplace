@@ -1,16 +1,17 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.7;
 
-    // @author: MoMih2022 /// @author Dliteofficial, VictorFawole & Moralie
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+/// @author Dliteofficial, Moralie and Victor
 contract NFTAuction {
     // Variables
-    uint public actionFee;
+    uint public auctionFee;
+
+    address public auctioneer;
 
     //Auctioning duration, after which every auction ends. An auction cannot be stopped.
     uint public auctionDuration;
-
-    /// @notice Total number of auctions
-    uint public numberOfAuctions = 0;
 
     // @notice Total number of active auctions
     uint public numberOfActiveAuctions = 0;
@@ -25,9 +26,24 @@ contract NFTAuction {
         uint minimumStake;
         uint startTime;
         uint endTime;
-
+        address listor;
         uint lastBid;
         address lastBidder;
+    }
+
+    error ZeroInput();
+    error InvalidAuctionFee();
+    error NotOpen();
+    error MinimumStakeNotSatisfied();
+    error PlaceAHigherBid();
+    error OpenBidding();
+
+    constructor(uint _auctionFee, uint _auctionDuration, address _auctioneer) {
+      if(_auctionFee == 0 && _auctionDuration == 0) revert ZeroInput();
+      if(_auctionFee < 0.1e18) revert InvalidAuctionFee();
+      auctionFee = _auctionFee;
+      auctionDuration = _auctionDuration;
+      auctioneer = _auctioneer;
     }
 
     // Functions
@@ -36,30 +52,30 @@ contract NFTAuction {
     // @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /// @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /** @dev This function records the details of an auction including the start and endTime
-      * @dev This function is alos payable because they need to pay an auction fee to auction
+    *   @dev This function is alos payable because they need to pay an auction fee to auction
     */
     // @param nftAddress This is the address of the nft we are auctioning.
     // @param tokenId This is so we transfer the right token in the collection
     // @param minimumStake The minimum amount that can be accepted for a bid
 
-    function createAuction (address nftAddress, uint tokenId, uint minimumStake) public payable {
-        require(msg.value >= actionFee, "Action fee not met");
-        require(nftAddress.transferFrom(msg.sender, address(this), tokenId), "Transfer of NFT failed");
+    function createAuction (address _nftAddress, uint _tokenId, uint _minimumStake) public payable {
+        if(msg.value < auctionFee) revert InvalidAuctionFee();
+        IERC721(_nftAddress).transferFrom(msg.sender, address(this), _tokenId); //Ensure this passes
         
         //increment the number of auctions
-        numberOfAuctions++;
+        auctionCounter++;
         numberOfActiveAuctions++;
 
         // Store the auction information
-        uint uniqueId = auctionCounter++;
-        auctions[uniqueId] = Auction({
-            nftAddress: nftAddress,
-            tokenId: tokenId,
-            minimumStake: minimumStake,
+        auctions[auctionCounter - 1] = Auction({
+            nftAddress: _nftAddress,
+            tokenId: _tokenId,
+            minimumStake: _minimumStake,
             startTime: block.timestamp,
             endTime: block.timestamp + auctionDuration,
             lastBid: 0,
-            lastBidder: address(0)
+            lastBidder: address(0),
+            listor: msg.sender
         });
     }
 
@@ -71,11 +87,17 @@ contract NFTAuction {
      */
 
     function bid (uint uniqueId) public payable {
-        require(isOpen(uniqueId), "Auction is closed");
-        require(msg.value > auctions[uniqueId].lastBid, "Bid must be higher than the last bid");
-        require(msg.value >= auctions[uniqueId].minimumStake, "Bid must meet the minimum stake");
-        auctions[uniqueId].lastBid = msg.value;
-        auctions[uniqueId].lastBidder = msg.sender;
+        if(!isOpen(uniqueId)) revert NotOpen();
+        Auction memory AUCDetails = auctions[uniqueId];
+        if(msg.value < AUCDetails.minimumStake) revert MinimumStakeNotSatisfied();
+        if(msg.value <= AUCDetails.lastBid) revert PlaceAHigherBid();
+        address lastBidder = AUCDetails.lastBidder;
+        uint lastbid = AUCDetails.lastBid;
+        AUCDetails.lastBidder = msg.sender;
+        AUCDetails.lastBid = msg.value;
+        auctions[uniqueId] = AUCDetails;
+        //This might lead to a Denial of Service Attack. It is best you use an ERC20 token to prevent this so balances can just be recorder
+        payable(lastBidder).transfer(lastbid);
     }
 
     /*
@@ -86,31 +108,28 @@ contract NFTAuction {
 
     function claimMyFunds (uint uniqueId) public onlyAuctioneer {
 
-        require(!isOpen(uniqueId), "Auction is still open");
+        if(isOpen(uniqueId)) revert OpenBidding();
 
-        address winner = auctions[uniqueId].lastBidder;
+        Auction memory AUCDetails = auctions[uniqueId];
 
-        uint bidAmount = auctions[uniqueId].lastBid;
+        address winner = AUCDetails.lastBidder;
+        uint bidAmount = AUCDetails.lastBid;
+        uint tokenId = AUCDetails.tokenId;
+        address nftAddress = AUCDetails.nftAddress;
     
         require(winner != address(0), "No bids were made on this auction");
-    
-        bool transferSuccess = auctions[uniqueId].nftAddress.transferFrom(address(this), winner, auctions[uniqueId].tokenId);
-    
-        require(transferSuccess, "Transfer failed");
-    
-        // Transfer the winning bid amount to the auctioneer
-        address auctioneer = address(this);
-        auctioneer.transfer(bidAmount);
-    
+        payable(AUCDetails.listor).transfer(bidAmount);
+
+        IERC721(nftAddress).transferFrom(address(this), winner, tokenId);
+
         delete auctions[uniqueId];
-    
         numberOfActiveAuctions--;
     }
 
 
 
     modifier onlyAuctioneer {
-        require(msg.sender == address(this), "Only the auctioneer can perform this action");
+        require(msg.sender == auctioneer, "Only the auctioneer can perform this action");
         _;
     }
 

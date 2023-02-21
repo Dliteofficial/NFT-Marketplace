@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "src/NFTMarketplace.sol";
+import {EcstasyMKT} from "src/EcstasyMKT.sol";
 
 contract EcstasyNFT is ERC721URIStorage{
     using Counters for Counters.Counter;
@@ -16,7 +16,7 @@ contract EcstasyNFT is ERC721URIStorage{
         _;
     }
 
-    constructor(address _address) ERC721("ECstasyNFT", "eNFT"){
+    constructor(address payable _address) ERC721("EcstasyNFT", "eNFT"){
         marketplace = EcstasyMKT(_address);
     }
 
