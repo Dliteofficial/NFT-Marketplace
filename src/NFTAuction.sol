@@ -67,7 +67,7 @@ contract NFTAuction {
         numberOfActiveAuctions++;
 
         // Store the auction information
-        Auction memory auc = Auction({
+        auctions[auctionCounter - 1] = Auction({
             nftAddress: _nftAddress,
             tokenId: _tokenId,
             minimumStake: _minimumStake,
@@ -77,7 +77,6 @@ contract NFTAuction {
             lastBidder: address(0),
             listor: msg.sender
         });
-        auctions[auctionCounter - 1] = auc;
     }
 
     /** 

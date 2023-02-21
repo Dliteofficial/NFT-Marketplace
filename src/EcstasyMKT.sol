@@ -66,7 +66,7 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         if(msg.value < listing_fee) revert InvalidListingFee();
         if(_tokenAddress == address(0)) revert ZeroAddress();
         IERC721(_tokenAddress).transferFrom(msg.sender, address(this), tokenId);
-        listedNFT memory NFTinfo = listedNFT({ //Direct Listing cost review
+        listings[listedNFTCount] = listedNFT({
             NFTAddress: _tokenAddress, 
             listor: msg.sender, 
             tokenID: tokenId, 
@@ -74,7 +74,6 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
             timestamp: block.timestamp,
             canceled_sold: false
             });
-        listings[listedNFTCount] = NFTinfo;
         myListings[msg.sender].tokenIds.push(listedNFTCount);
         myListings[msg.sender].total += 1;
         listedNFTCount++;
@@ -154,7 +153,7 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
     }
 
     function _setListingFee(uint _listing_fee) internal {
-        if(listing_fee < 0.1e18) revert InvalidListingFee();
+        if(_listing_fee < 0.1e18) revert InvalidListingFee();
         listing_fee = _listing_fee;
     }
 }
