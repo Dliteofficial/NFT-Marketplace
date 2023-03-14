@@ -6,12 +6,12 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 /// @author Dliteofficial, Moralie and Victor
 contract NFTAuction {
     // Variables
-    uint public auctionFee;
+    uint public immutable auctionFee;
 
-    address public auctioneer;
+    address public immutable auctioneer;
 
     //Auctioning duration, after which every auction ends. An auction cannot be stopped.
-    uint public auctionDuration;
+    uint public immutable auctionDuration;
 
     // @notice Total number of active auctions
     uint public numberOfActiveAuctions = 0;
@@ -38,6 +38,16 @@ contract NFTAuction {
     error PlaceAHigherBid();
     error OpenBidding();
 
+    event auctionCreated(uint uniqueId, address tokenAddress, uint tokenId, uint minimumStake);
+    event lastBid(uint uniqueId, address lastBidder, uint lastBid);
+    event fundClaimSuccessful(uint uniqueId);
+
+
+    modifier onlyAuctioneer {
+        require(msg.sender == auctioneer, "Only the auctioneer can perform this action");
+        _;
+    }
+
     constructor(uint _auctionFee, uint _auctionDuration, address _auctioneer) {
       if(_auctionFee == 0 && _auctionDuration == 0) revert ZeroInput();
       if(_auctionFee < 0.1e18) revert InvalidAuctionFee();
@@ -49,14 +59,14 @@ contract NFTAuction {
     // Functions
     
 
-    // @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
+    /// @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /// @notice Allows anyone to list their NFT for auction. Listed NFTs cannot be auctioned
     /** @dev This function records the details of an auction including the start and endTime
     *   @dev This function is alos payable because they need to pay an auction fee to auction
     */
-    // @param nftAddress This is the address of the nft we are auctioning.
-    // @param tokenId This is so we transfer the right token in the collection
-    // @param minimumStake The minimum amount that can be accepted for a bid
+    /// @param _nftAddress This is the address of the nft we are auctioning.
+    /// @param _tokenId This is so we transfer the right token in the collection
+    /// @param _minimumStake The minimum amount that can be accepted for a bid
 
     function createAuction (address _nftAddress, uint _tokenId, uint _minimumStake) public payable {
         if(msg.value < auctionFee) revert InvalidAuctionFee();
@@ -77,6 +87,8 @@ contract NFTAuction {
             lastBidder: address(0),
             listor: msg.sender
         });
+
+        emit auctionCreated(auctionCounter - 1, _nftAddress, _tokenId, _minimumStake);
     }
 
     /** 
@@ -98,15 +110,17 @@ contract NFTAuction {
         auctions[uniqueId] = AUCDetails;
         //This might lead to a Denial of Service Attack. It is best you use an ERC20 token to prevent this so balances can just be recorder
         payable(lastBidder).transfer(lastbid);
+
+        emit lastBid(uniqueId, msg.sender, msg.value);
     }
 
-    /*
-    * @notice: Allows the auctioneer to claim the highest bid in the auction
+    /**
+    * @notice Allows the auctioneer to claim the highest bid in the auction
     * @dev onlyAuctioneer verifies that the auctioneer is the one trying to collect the funds for the NFT (uniqueID)
     * @dev pay the auctioneer the bidded amount and transfer the NFT to the winner of the bid
     */
 
-    function claimMyFunds (uint uniqueId) public onlyAuctioneer {
+    function claimMyFunds (uint uniqueId) external onlyAuctioneer {
 
         if(isOpen(uniqueId)) revert OpenBidding();
 
@@ -124,14 +138,13 @@ contract NFTAuction {
 
         delete auctions[uniqueId];
         numberOfActiveAuctions--;
+
+        emit fundClaimSuccessful(uniqueId);
     }
 
-
-
-    modifier onlyAuctioneer {
-        require(msg.sender == auctioneer, "Only the auctioneer can perform this action");
-        _;
-    }
+    ///////////////////////////////////////////////////////
+    ////////////////  VIEW FUNCTIONS     /////////////////
+    //////////////////////////////////////////////////////
 
 
     function isOpen(uint uniqueId) public view returns (bool) {

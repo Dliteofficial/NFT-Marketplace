@@ -7,9 +7,9 @@ import {EcstasyMKT} from "src/EcstasyMKT.sol";
 
 contract EcstasyNFT is ERC721URIStorage{
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    Counters.Counter public _tokenIds;
 
-    EcstasyMKT marketplace;
+    EcstasyMKT public immutable marketplace;
 
     modifier onlyMarketplace() {
         require(msg.sender == address(marketplace));

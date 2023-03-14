@@ -10,12 +10,12 @@ import {NFTAuction} from "src/NFTAuction.sol";
 
 contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
  
-   EcstasyNFT public nativeNFT;
+   EcstasyNFT public immutable nativeNFT;
    uint public listedNFTCount = 1;
    mapping (uint => listedNFT) public listings;
    mapping (address => ILD) public myListings;
    uint public minting_fee;
-   uint listing_fee;
+   uint public listing_fee;
 
    error ZeroAddress();
    error InvalidMintingFee();
@@ -39,6 +39,14 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         uint[] tokenIds;
         uint total;
     }
+
+    event listingSuccessful (address tokenAddress, uint tokenId, uint listingPrice);
+    event listingPriceUpdated (uint listingId, uint listingPrice);
+    event listingCanceled(uint listingId);
+    event mintSuccessful(address owner, uint tokenId);
+    event NFTBought(address buyer, uint listingID, address tokenAddress, uint tokenId, uint bargainPrice);
+    event mintingFeeSet(uint newMintingFee);
+    event listingFeeSet(uint newListingFee);
 
     constructor(
         uint _minting_fee, 
@@ -77,6 +85,8 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         myListings[msg.sender].tokenIds.push(listedNFTCount);
         myListings[msg.sender].total += 1;
         listedNFTCount++;
+
+        emit listingSuccessful(_tokenAddress, tokenId, listingPrice_in_MATIC);
     }
 
     function updateListingPrice(uint256 listedTokenID, uint listingPrice_in_MATIC) external payable {
@@ -84,6 +94,8 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         if(msg.sender != listing.listor) revert IncorrectMSG_SENDER();
         if(block.timestamp < listing.timestamp + 30 days) revert TimestampError();
         listings[listedTokenID].listingPrice = listingPrice_in_MATIC;
+
+        emit listingPriceUpdated(listedTokenID, listingPrice_in_MATIC);
     }
 
     function cancelListing (uint listingId) external {
@@ -100,11 +112,15 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
         NFTinfo.canceled_sold = true;
         listings[listingId] = NFTinfo;
         IERC721(nftAddr).transferFrom(address(this), msg.sender, tokenId);
+
+        emit listingCanceled(listingId);
     }
 
     function mintEcstasy() external payable {
         if(msg.value < minting_fee) revert InvalidMintingFee();
         nativeNFT.mintEcstasyNFT(msg.sender);
+        
+        emit mintSuccessful(msg.sender, nativeNFT._tokenIds() - 1);
     }
     
     function buyNFT(uint listingID) external nonReentrant payable{
@@ -123,6 +139,8 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
        listings[listingID] = NFTinfo;
        IERC721(tokenAddress).transferFrom(address(this), msg.sender, tokenId);
        payable(listor).transfer(msg.value);
+
+       emit NFTBought(msg.sender, listingID, tokenAddress, tokenId, msg.value);
     }
 
     ///////////////////////////////////////////////////////
@@ -150,10 +168,14 @@ contract EcstasyMKT is NFTAuction, ReentrancyGuard, Ownable {
     function _setMintingFee(uint _mintingFee) internal {
         if(_mintingFee < 0.1e18) revert InvalidMintingFee();
         minting_fee = _mintingFee;
+
+        emit mintingFeeSet(_mintingFee);
     }
 
     function _setListingFee(uint _listing_fee) internal {
         if(_listing_fee < 0.1e18) revert InvalidListingFee();
         listing_fee = _listing_fee;
+
+        emit listingFeeSet(_listing_fee);
     }
 }
